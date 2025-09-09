@@ -1,0 +1,27 @@
+meta {
+  name: createPolicy
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/cars/:carId/policy
+  body: json
+  auth: inherit
+}
+
+params:path {
+  carId: 1
+}
+
+body:json {
+  {
+    "provider": "Denis asigurari",
+    "startDate": "2025-10-08",
+    "endDate": "2026-10-08"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

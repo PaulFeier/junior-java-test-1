@@ -1,0 +1,30 @@
+meta {
+  name: isInsuranceValid
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/api/cars/:carId/insurance-valid?date=2025-11-11
+  body: json
+  auth: inherit
+}
+
+params:query {
+  date: 2025-11-11
+}
+
+params:path {
+  carId: 4
+}
+
+body:json {
+  {
+    "id": 0,
+    "date": "2025-09-09"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
