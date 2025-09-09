@@ -1,13 +1,17 @@
 package com.example.carins.web;
 
 import com.example.carins.model.Car;
+import com.example.carins.model.InsurancePolicy;
 import com.example.carins.service.CarService;
 import com.example.carins.web.dto.CarDto;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api")
@@ -26,11 +30,38 @@ public class CarController {
 
     @GetMapping("/cars/{carId}/insurance-valid")
     public ResponseEntity<?> isInsuranceValid(@PathVariable Long carId, @RequestParam String date) {
-        // TODO: validate date format and handle errors consistently
-        LocalDate d = LocalDate.parse(date);
-        boolean valid = service.isInsuranceValid(carId, d);
-        return ResponseEntity.ok(new InsuranceValidityResponse(carId, d.toString(), valid));
+        // TODO: validate date format and handle errors consistently - done
+        LocalDate parsedDate = null;
+
+        try {
+            parsedDate = LocalDate.parse(date);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Date format not valid.");
+        }
+
+        boolean valid = false;
+
+        try {
+            valid = service.isInsuranceValid(carId, parsedDate);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.badRequest().body("Car ID was not found.");
+        }
+
+        return ResponseEntity.ok(new InsuranceValidityResponse(carId, parsedDate.toString(), valid));
     }
+
+    @PostMapping("/cars/{carId}/policy")
+    public ResponseEntity<?> registerNewPolicy(@PathVariable Long carId, @RequestBody InsurancePolicy insurance) {
+        service.registerNewPolicy(carId, insurance);
+
+        return ResponseEntity.ok(insurance);
+    }
+
+//    @PutMapping("/cars/{carId}/policy")
+//    public ResponseEntity<?> updateExistingPolicy() {}
+
+//    @PostMapping("/cars/{carId}/claims")
+//    public ResponseEntity<?> registerNewInsuranceClaim(@PathVariable Long carId, @RequestBody , ) {}
 
     private CarDto toDto(Car c) {
         var o = c.getOwner();
