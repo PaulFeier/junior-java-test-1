@@ -1,12 +1,16 @@
 package com.example.carins.web;
 
 import com.example.carins.model.Car;
+import com.example.carins.model.InsuranceClaim;
 import com.example.carins.model.InsurancePolicy;
 import com.example.carins.service.CarService;
 import com.example.carins.web.dto.CarDto;
+import com.example.carins.web.dto.InsuranceClaimRequestDto;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -31,6 +35,7 @@ public class CarController {
     @GetMapping("/cars/{carId}/insurance-valid")
     public ResponseEntity<?> isInsuranceValid(@PathVariable Long carId, @RequestParam String date) {
         // TODO: validate date format and handle errors consistently - done
+        if (carId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
         LocalDate parsedDate = null;
 
         try {
@@ -47,6 +52,12 @@ public class CarController {
             return ResponseEntity.badRequest().body("Car ID was not found.");
         }
 
+//        if (!service.isInsuranceValid(carId, parsedDate)) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.NOT_FOUND, "entity not found"
+//            );
+//        }
+
         return ResponseEntity.ok(new InsuranceValidityResponse(carId, parsedDate.toString(), valid));
     }
 
@@ -57,11 +68,26 @@ public class CarController {
         return ResponseEntity.ok(insurance);
     }
 
-//    @PutMapping("/cars/{carId}/policy")
-//    public ResponseEntity<?> updateExistingPolicy() {}
+    @PutMapping("/cars/{carId}/policy")
+    public ResponseEntity<?> updateExistingPolicy(@PathVariable Long carId, @RequestBody InsurancePolicy insurance) {
+        service.updateExistingPolicy(carId, insurance);
+        return ResponseEntity.ok(insurance);
+    }
 
-//    @PostMapping("/cars/{carId}/claims")
-//    public ResponseEntity<?> registerNewInsuranceClaim(@PathVariable Long carId, @RequestBody , ) {}
+    @PostMapping("/cars/{carId}/claims")
+    public ResponseEntity<?> registerNewInsuranceClaim(@PathVariable Long carId, @Valid @RequestBody InsuranceClaimRequestDto claimRequest) {
+        InsuranceClaim createdClaim = service.registerNewInsuranceClaim(carId, claimRequest);
+
+        return ResponseEntity.ok(createdClaim);
+    }
+
+//    @GetMapping("/cars/{carId}/history")
+//    public ResponseEntity<?> getCarHistory(@PathVariable Long carId) {
+//        if (carId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
+//        Map<Car, InsurancePolicy> map =
+//
+//        return ResponseEntity.ok();
+//    }
 
     private CarDto toDto(Car c) {
         var o = c.getOwner();

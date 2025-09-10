@@ -1,7 +1,10 @@
 package com.example.carins.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.LocalDate;
 
@@ -15,9 +18,12 @@ public class InsurancePolicy {
     private Car car;
 
     private String provider;
+
+    @PastOrPresent
     private LocalDate startDate;
 
-    @NotBlank
+    @NotNull
+    @Future
     @Column(nullable = false)
     private LocalDate endDate; // nullable == open-ended
 
