@@ -6,6 +6,7 @@ import com.example.carins.model.InsurancePolicy;
 import com.example.carins.repo.CarRepository;
 import com.example.carins.repo.InsuranceClaimRepository;
 import com.example.carins.repo.InsurancePolicyRepository;
+import com.example.carins.web.dto.CarHistoryEventDto;
 import com.example.carins.web.dto.InsuranceClaimRequestDto;
 import com.example.carins.web.dto.InsurancePolicyDto;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -85,4 +88,45 @@ public class CarService {
 
         return claimRepository.save(newClaim);
     }
+
+    public List<CarHistoryEventDto> getCarHistory(Long carId) {
+        Car car = carRepository.findById(carId).orElseThrow();
+
+        List<CarHistoryEventDto> events = new ArrayList<>();
+
+        events.add(new CarHistoryEventDto(
+                LocalDate.now(),
+                "CAR_REGISTERED",
+                "Car with ID " + car.getId() + " was registered."
+        ));
+
+        // Event: Owner (if exists)
+        if (car.getOwner() != null) {
+            events.add(new CarHistoryEventDto(
+                    LocalDate.now(),
+                    "OWNER_ASSIGNED",
+                    "Owner " + car.getOwner().getName() + " assigned to car."
+            ));
+        }
+
+        // Events: Insurance policies
+        for (InsurancePolicy p : policyRepository.findByCarId(carId)) {
+            events.add(new CarHistoryEventDto(
+                    p.getStartDate(),
+                    "INSURANCE_START",
+                    "Insurance with " + p.getProvider() + " started."
+            ));
+            events.add(new CarHistoryEventDto(
+                    p.getEndDate(),
+                    "INSURANCE_END",
+                    "Insurance with " + p.getProvider() + " ended."
+            ));
+        }
+
+        // Sort chronologically
+        events.sort(Comparator.comparing(CarHistoryEventDto::date));
+
+        return events;
+    }
+
 }

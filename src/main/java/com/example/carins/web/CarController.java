@@ -5,6 +5,7 @@ import com.example.carins.model.InsuranceClaim;
 import com.example.carins.model.InsurancePolicy;
 import com.example.carins.service.CarService;
 import com.example.carins.web.dto.CarDto;
+import com.example.carins.web.dto.CarHistoryEventDto;
 import com.example.carins.web.dto.InsuranceClaimRequestDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -52,12 +53,6 @@ public class CarController {
             return ResponseEntity.badRequest().body("Car ID was not found.");
         }
 
-//        if (!service.isInsuranceValid(carId, parsedDate)) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "entity not found"
-//            );
-//        }
-
         return ResponseEntity.ok(new InsuranceValidityResponse(carId, parsedDate.toString(), valid));
     }
 
@@ -81,13 +76,10 @@ public class CarController {
         return ResponseEntity.ok(createdClaim);
     }
 
-//    @GetMapping("/cars/{carId}/history")
-//    public ResponseEntity<?> getCarHistory(@PathVariable Long carId) {
-//        if (carId == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
-//        Map<Car, InsurancePolicy> map =
-//
-//        return ResponseEntity.ok();
-//    }
+    @GetMapping("/cars/{carId}/history")
+    public ResponseEntity<List<CarHistoryEventDto>> getCarHistory(@PathVariable Long carId) {
+        return ResponseEntity.ok(service.getCarHistory(carId));
+    }
 
     private CarDto toDto(Car c) {
         var o = c.getOwner();
