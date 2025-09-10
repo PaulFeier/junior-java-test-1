@@ -1,0 +1,27 @@
+meta {
+  name: createClaim
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/api/cars/:carId/claims
+  body: json
+  auth: inherit
+}
+
+params:path {
+  carId: 2
+}
+
+body:json {
+  {
+    "claimDate": "2025-09-10",
+    "description": "damaged tire",
+    "amount": 100 
+  }
+}
+
+settings {
+  encodeUrl: true
+}
