@@ -100,7 +100,6 @@ public class CarService {
                 "Car with ID " + car.getId() + " was registered."
         ));
 
-        // Event: Owner (if exists)
         if (car.getOwner() != null) {
             events.add(new CarHistoryEventDto(
                     LocalDate.now(),
@@ -109,7 +108,6 @@ public class CarService {
             ));
         }
 
-        // Events: Insurance policies
         for (InsurancePolicy p : policyRepository.findByCarId(carId)) {
             events.add(new CarHistoryEventDto(
                     p.getStartDate(),
@@ -123,7 +121,6 @@ public class CarService {
             ));
         }
 
-        // Sort chronologically
         events.sort(Comparator.comparing(CarHistoryEventDto::date));
 
         return events;
